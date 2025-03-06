@@ -11,6 +11,6 @@ import time
 def connect_to_sql():
     conn = mysql.connector.connect(user='root', password='',
                                   host='127.0.0.1',
-                                  database='cne340_fp')
+                                  database='cne340_gold')
     return conn
 
