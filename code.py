@@ -1,5 +1,5 @@
 # CNE 340 Final Project
-#Project Name: Historic Gold Price Data Analysis
+# Project Name: Historic Gold Price Data Analysis
 # Due date: 03/18/2025
 # Project Team : 1- Wahaj AL Obid, 2- Aaron Henson, 3- Lidsyda Nouanphachan
 import pandas as pd
