@@ -19,3 +19,5 @@ def main():
     #Further code for data analysis will go here.
     print("connected to the database successfully!")
     conn.close()
+if __name__=="__main__":
+    main()
