@@ -14,3 +14,8 @@ def connect_to_sql():
                                   database='cne340_gold')
     return conn
 
+def main():
+    conn = connect_to_sql()
+    #Further code for data analysis will go here.
+    print("connected to the database successfully!")
+    conn.close()
