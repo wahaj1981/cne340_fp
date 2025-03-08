@@ -21,3 +21,9 @@ def main():
     conn.close()
 if __name__=="__main__":
     main()
+
+#Create the table structure
+def create_tables(cursor):
+    query = cursor.execute(
+        "CREATE TABLE IF NOT EXISTS gold_price(Date DATE PRIMARY KEY, Price FLOAT)")
+    return query_sql(cursor, query)
