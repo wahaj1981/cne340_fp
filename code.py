@@ -27,3 +27,8 @@ def create_tables(cursor):
     query = cursor.execute(
         "CREATE TABLE IF NOT EXISTS gold_price(Date DATE PRIMARY KEY, Price FLOAT)")
     return query_sql(cursor, query)
+
+#Query the database
+def query_sql(cursor, query):
+    cursor.execute(query)
+    return cursor
