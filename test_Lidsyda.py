@@ -4,7 +4,7 @@ import kagglehub
 from kagglehub import KaggleDatasetAdapter
 
 # Set the path to the file you'd like to load
-file_path = ""
+file_path = "gold_price_data_.csv"
 
 # Load the latest version
 df = kagglehub.load_dataset(
@@ -17,4 +17,4 @@ df = kagglehub.load_dataset(
   # https://github.com/Kaggle/kagglehub/blob/main/README.md#kaggledatasetadapterpandas
 )
 
-print("First 5 records:", df.head())
+print("First 5 records:\n", df.head())
