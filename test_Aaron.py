@@ -58,3 +58,35 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+import matplotlib.pyplot as plt
+
+# Connect to the database
+conn = connect_to_sql()
+cursor = conn.cursor()
+
+# Query the database
+cursor.execute("SELECT * FROM gold")
+rows = cursor.fetchall()
+
+# Close the database connection
+cursor.close()
+conn.close()
+
+# Create a DataFrame from the query results
+df = pd.DataFrame(rows, columns=['Date', 'Gold_Price'])
+
+# Convert the 'Date' column to datetime
+df['Date'] = pd.to_datetime(df['Date'])
+
+# Set the 'Date' column as the index
+df.set_index('Date', inplace=True)
+
+# Plot the data
+plt.plot(df.index, df['Gold_Price'])
+plt.xlabel('Date')
+plt.ylabel('Gold Price')
+plt.title('Gold Price Over Time')
+
+# Show the plot
+plt.show()
