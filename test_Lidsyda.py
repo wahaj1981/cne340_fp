@@ -3,18 +3,22 @@
 import kagglehub
 from kagglehub import KaggleDatasetAdapter
 
+dataset_name = "jishnukoliyadan/gold-price-1979-present"
+dataset_files = kagglehub.list_files(dataset_name)
+print("Available files in dataset:", dataset_files)
+
 # Set the path to the file you'd like to load
-file_path = ""
+file_path = "gold_price_data_.csv"
+try:
+    # Load the latest dataset version
+    df = kagglehub.load_dataset(
+        KaggleDatasetAdapter.PANDAS,
+        dataset_name,
+        file_path,
+    )
 
-# Load the latest version
-df = kagglehub.load_dataset(
-  KaggleDatasetAdapter.PANDAS,
-  "jishnukoliyadan/gold-price-1979-present",
-  file_path,
-  # Provide any additional arguments like 
-  # sql_query or pandas_kwargs. See the 
-  # documenation for more information:
-  # https://github.com/Kaggle/kagglehub/blob/main/README.md#kaggledatasetadapterpandas
-)
+    # Display first few records
+    print("First 5 records:\n", df.head())
 
-print("First 5 records:", df.head())
+except Exception as e:
+    print("Error loading dataset:", e)
