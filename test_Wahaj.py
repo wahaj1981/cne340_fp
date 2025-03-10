@@ -1,59 +1,4 @@
 import mysql.connector
-import csv
-import numpy as np
-import pandas as pd
-import datetime
-from sqlalchemy import create_engine
-from sqlalchemy import text
-import matplotlib.pyplot as plt
-
-# # Reviewing the data # #
-
-online_data = r'https://api.covidtracking.com/v1/us/daily.csv'
-tables = pd.read_csv(online_data)
-print(tables.head(15))  # getting first 15 entries of dataframe
-print(tables.tail(15))  # getting last 15 entries of dataframe
-# how big is this data
-tables.shape
-print("This data has {} rows and {} columns.".format(tables.shape[0], tables.shape[1]))
-# review columns
-print(tables.columns)
-# review variable types and names
-print(tables.dtypes)
-
-# install cryptography
-hostname="127.0.0.1"
-username="root"
-passwd=""
-db_name="gold_prices"
-
-# install pymysql and sqlalchemy
-engine = create_engine("mysql+pymysql://{user}:{pw}@{host}/{db}".format(host=hostname, db=db_name, user=username, pw=passwd))
-# review and download data
-tables = pd.read_csv('https://api.covidtracking.com/v1/us/daily.csv')
-#tables = pd.read_csv('https://api.xxx.csv')
-tables.rename(columns = {'submission_date':'date'}, inplace=True) #rename for better understanding on data
-
-# connect to db
-connection=engine.connect()
-# create table
-tables.to_sql('gold', con = engine, if_exists = 'append')
-# create second table for DISC details
-connection.execute(text('CREATE TABLE gold_2 Like gold'))
-connection.execute(text('INSERT INTO gold_2 SELECT DISTINCT * FROM gold'))
-# drop gols table and rename gold_2 to gold
-connection.execute(text('DROP TABLE gold'))
-connection.execute(text('ALTER TABLE gold_2 RENAME TO gold'))
-
-#df = pd.read_sql_table('gold', connection)
-#https://eazybi.com/blog/data-visualization-and-chart-types
-df = pd.read_csv('https://api.covidtracking.com/v1/us/daily.csv')
-
-
-
-################################################## UPDATE TO Aaron CODE ###############################################
-
-import mysql.connector
 import requests
 import pandas as pd
 import numpy as np
@@ -69,12 +14,14 @@ pwd = ''
 hostname = '127.0.0.1'
 dbname = 'gold'
 
+
 # Connect to MySQL database
 def connect_to_sql():
     conn = mysql.connector.connect(user=uname, password=pwd,
                                    host=hostname,
                                    database=dbname)
     return conn
+
 
 # Create the database if it doesn't exist
 def create_database():
@@ -83,6 +30,7 @@ def create_database():
     cursor.execute("CREATE DATABASE IF NOT EXISTS gold")
     cursor.close()
     conn.close()
+
 
 # Main function
 def main():
@@ -98,31 +46,55 @@ def main():
         engine='openpyxl'
     )
 
-    # Print column names to inspect structure
-    print("Column names:", tables.columns)
+    # Print column names to inspect structure before renaming
+    print("Column names before renaming:", tables.columns)
+
+    # Rename columns after checking them carefully
+    tables.rename(columns={
+        "Unnamed: 0": "Index",
+        #"GBP/Gold": "Date for GBP",  # Corrected column name to match the actual 'GBP/Gold'
+        #"Unnamed: 2": "Gold_Price in GBP",
+        "Unnamed: 3": "empty",
+        "USD/Gold": "Date",  # Corrected column name to match the actual 'USD/Gold'
+        "Unnamed: 5": "Gold_Price",
+        # "Unnamed: 6": "Some_Value",
+        # "Unnamed: 8": "Silver_Column",
+        # "Unnamed: 9": "Extra_Data",
+        # "Unnamed: 11": "Platinum_Column"
+    }, inplace=True)
+
+    # Print column names after renaming
+    print("Column names after renaming:", tables.columns)
+
+    # Now select only the necessary columns
+    tables = tables[['Date', 'Gold_Price']]  # Ensure 'Date' and 'Gold_Price' are available
+    tables.columns = ['Date', 'Gold_Price']  # Rename to expected names
 
     # Select only the necessary columns (adjust based on actual column names)
-    tables = tables.iloc[:, [1, 3]]  # Adjust to select columns as needed, assuming Date is in column 1 and Gold_Price is in column 3
-    tables.columns = ['GBP/Gold', 'Gold_Price']  # Rename to expected names
+    tables = tables[['Date', 'Gold_Price']]  # Select Date and Gold_Price columns directly
+    tables.columns = ['Date', 'Gold_Price']  # Rename to expected names
 
-    # Convert 'GBP/Gold' column to datetime (This seems to be the actual date column)
-    tables['GBP/Gold'] = pd.to_datetime(tables['GBP/Gold'], errors='coerce')
+    # Convert 'Date' column to datetime
+    tables['Date'] = pd.to_datetime(tables['Date'], errors='coerce')
 
     # Reset index
     tables.reset_index(drop=True, inplace=True)
 
     # Connect and load the data into SQL
     connection = engine.connect()
-    tables.to_sql('gold', con=engine, if_exists='replace', index=False)
+    tables.to_sql('gold', con=engine, if_exists='append', index=False)
 
     # Create a temporary table and manipulate data
     connection.execute(text('CREATE TABLE gold_temp_2 LIKE gold'))
-    connection.execute(text('INSERT INTO gold_temp_2 SELECT DISTINCT `GBP/Gold`, `Gold_Price` FROM gold'))
+
+    # Fix SQL query: Update column names as 'Date' and 'Gold_Price' since 'GBP/Gold' is not used.
+    connection.execute(text('INSERT INTO gold_temp_2 SELECT DISTINCT `Date`, `Gold_Price` FROM gold'))
     connection.execute(text('DROP TABLE gold'))
     connection.execute(text('ALTER TABLE gold_temp_2 RENAME TO gold'))
 
     # Close the database connection
     connection.close()
+
 
 if __name__ == "__main__":
     main()
@@ -138,24 +110,48 @@ rows = cursor.fetchall()
 # Close the database connection
 cursor.close()
 conn.close()
-
+#######################################################################################
 # Create a DataFrame from the query results
-df = pd.DataFrame(rows, columns=['GBP/Gold', 'Gold_Price'])
+df = pd.DataFrame(rows, columns=['Date', 'Gold_Price'])
+print(df)
+# Convert the 'Gold_Price' column to datetime
+df['Gold_Price'] = pd.to_datetime(df['Gold_Price'], errors='coerce')
+print(df)
+# Set the 'Date' column as the index
+df.set_index('Date', inplace=True)
+# Resample the data by year and calculate the average gold price for each year
+yearly_avg = df['Gold_Price'].resample('YE').mean()  #
+print(yearly_avg)
 
-# Convert the 'GBP/Gold' column to datetime
-df['GBP/Gold'] = pd.to_datetime(df['GBP/Gold'], errors='coerce')
+########################################################################################
 
-# Set the 'GBP/Gold' column as the index
-df.set_index('GBP/Gold', inplace=True)
 
-# Plot the data
+# Plot 1: Line chart showing the gold price over time
 plt.figure(figsize=(10, 5))
-plt.plot(df.index, df['Gold_Price'], marker='o', linestyle='-', color='b', label='Gold Price')
-plt.xlabel('GBP/Gold')
-plt.ylabel('Gold Price')
+plt.plot(df.index, df['Gold_Price'], marker='o', linestyle='-', color='b', label='Gold_Price')
+plt.xlabel('Date')
+plt.ylabel('Gold_Price')
 plt.title('Gold Price Over Time')
 plt.legend()
 plt.grid()
+plt.show()
 
-# Show the plot
+# Plot 2: Bar chart showing the gold price for each date
+plt.figure(figsize=(10, 5))
+plt.bar(df.index, df['Gold_Price'], color='g', label='Gold_Price')
+plt.xlabel('Date')
+plt.ylabel('Gold_Price')
+plt.title('Gold Price for Each Date')
+plt.legend()
+plt.grid(axis='y')
+plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+plt.show()
+
+# Plot 3: Histogram showing the distribution of gold prices
+plt.figure(figsize=(10, 5))
+plt.hist(df['Gold_Price'].dropna(), bins=20, color='r', edgecolor='black')
+plt.xlabel('Gold_Price')
+plt.ylabel('Frequency')
+plt.title('Distribution of Gold Prices')
+plt.grid(True)
 plt.show()
