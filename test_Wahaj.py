@@ -117,11 +117,24 @@ print(df)
 # Convert the 'Gold_Price' column to datetime
 df['Gold_Price'] = pd.to_datetime(df['Gold_Price'], errors='coerce')
 print(df)
+print(df.head)
 # Set the 'Date' column as the index
 df.set_index('Date', inplace=True)
 # Resample the data by year and calculate the average gold price for each year
 yearly_avg = df['Gold_Price'].resample('YE').mean()  #
 print(yearly_avg)
+
+df2 = pd.DataFrame(
+    {
+        "A": 1.0,
+        "B": pd.Timestamp("20130102"),
+        "C": pd.Series(1, index=list(range(4)), dtype="float32"),
+        "D": np.array([3] * 4, dtype="int32"),
+        "E": pd.Categorical(["test", "train", "test", "train"]),
+        "F": "foo",
+    }
+)
+print(df2)
 
 ########################################################################################
 
