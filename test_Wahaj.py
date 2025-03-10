@@ -51,7 +51,7 @@ df = pd.read_csv('https://api.covidtracking.com/v1/us/daily.csv')
 
 
 
-################################################## UPDATE TO Aaron CODE
+################################################## UPDATE TO Aaron CODE ###############################################
 
 import mysql.connector
 import requests
