@@ -15,8 +15,7 @@ def connect_to_sql():
 
 # Create the database if it doesn't exist
 def create_database():
-    conn = mysql.connector.connect(user='root', password='',
-                                   host='127.0.0.1')
+    conn = connect_to_sql()
     cursor = conn.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS gold")
     cursor.close()
