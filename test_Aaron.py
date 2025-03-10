@@ -5,12 +5,18 @@ import numpy as np
 import time
 from sqlalchemy import create_engine, text
 from datetime import date
+import mysql.connector
+
+uname = 'root'
+pwd = ''
+hostname = '127.0.0.1'
+dbname = 'gold'
 
 # Connect to database
 def connect_to_sql():
-    conn = mysql.connector.connect(user='root', password='',
-                                   host='127.0.0.1',
-                                   database='gold')
+    conn = mysql.connector.connect(user=uname, password=pwd,
+                                   host=hostname,
+                                   database=dbname)
     return conn
 
 # Create the database if it doesn't exist
@@ -26,10 +32,6 @@ def main():
     create_database()
 
 # Connect to the newly created database using SQLAlchemy
-    uname = 'root'
-    pwd = ''
-    hostname = '127.0.0.1'
-    dbname = 'gold'
     engine = create_engine(f"mysql+pymysql://{uname}:{pwd}@{hostname}/{dbname}")
 
 # Read the Excel file
