@@ -1,0 +1,60 @@
+import mysql.connector
+import requests
+import pandas as pd
+import numpy as np
+import time
+from sqlalchemy import create_engine, text
+from datetime import date
+
+# Connect to database
+def connect_to_sql():
+    conn = mysql.connector.connect(user='root', password='',
+                                   host='127.0.0.1',
+                                   database='gold')
+    return conn
+
+# Create the database if it doesn't exist
+def create_database():
+    conn = mysql.connector.connect(user='root', password='',
+                                   host='127.0.0.1')
+    cursor = conn.cursor()
+    cursor.execute("CREATE DATABASE IF NOT EXISTS gold")
+    cursor.close()
+    conn.close()
+
+# Main function
+def main():
+    create_database()
+
+# Connect to the newly created database using SQLAlchemy
+    uname = 'root'
+    pwd = ''
+    hostname = '127.0.0.1'
+    dbname = 'gold'
+    engine = create_engine(f"mysql+pymysql://{uname}:{pwd}@{hostname}/{dbname}")
+
+# Read the Excel file
+    tables = pd.read_excel('https://www.eia.gov/dnav/pet/hist_xls/EMD_EPD2DXL0_PTE_R5XCA_DPGw.xls', sheet_name='Data 1',
+                           header=2, index_col='Date')
+
+# Rename columns to shorter names
+    tables.columns = ['Gold_Price']
+
+# Reset index to include 'Date' as a column
+    tables.reset_index(inplace=True)
+
+# Connect and load the data into SQL
+    connection = engine.connect()
+    tables.to_sql('gold', con=engine, if_exists='replace', index=False)
+
+# Create a temporary table and manipulate data
+    connection.execute(text('CREATE TABLE gold_temp_2 LIKE gold'))
+    connection.execute(text('INSERT INTO gold_temp_2 SELECT DISTINCT Date, Gold_Price FROM gold'))
+    connection.execute(text('DROP TABLE gold'))
+    connection.execute(text('ALTER TABLE gold_temp_2 RENAME TO gold'))
+
+# Close the database connection
+    connection.close()
+
+if __name__ == "__main__":
+    main()
