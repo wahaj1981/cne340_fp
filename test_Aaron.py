@@ -1,11 +1,7 @@
 import mysql.connector  # Library for MySQL database connection
-import requests  # Library for making HTTP requests
 import pandas as pd  # Library for data manipulation and analysis
 import numpy as np  # Library for numerical computations
-import time  # Library for time-related functions
 from sqlalchemy import create_engine, text  # Library for SQL operations
-from datetime import date  # Library for date operations
-import pymysql  # Import pymysql for MySQL connection in SQLAlchemy
 import matplotlib.pyplot as plt  # Library for data visualization
 
 # Database credentials
