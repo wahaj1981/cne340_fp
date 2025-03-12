@@ -60,7 +60,7 @@ def main():
 
     # Convert 'Date' column to datetime format
     tables['Date'] = pd.to_datetime(tables['Date'], errors='coerce')
-
+    tables.dropna(inplace=True) # Drop rows with missing values
 
     # Reset index for better organization
     tables.reset_index(drop=True, inplace=True)
