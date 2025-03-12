@@ -1,10 +1,11 @@
+# CNE 340 Final Project
+# Project Name: Historic Gold Price Data Analysis
+# Due date: 03/18/2025
+# Project Team :1- Wahaj AL Obid,2- Aaron Henson,3- Lidsyda Nouanphachan
 import pandas as pd
-import numpy as np
-import mysql.connector
-import requests
-import time
-from sqlalchemy import create_engine, text
-import pymysql  # Required for SQLAlchemy MySQL connections
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sqlalchemy import create_engine
 
 # Database connection details
 hostname = "127.0.0.1"
@@ -12,65 +13,26 @@ uname = "root"
 pwd = ""
 dbname = "gold"
 
-# Step 1: Create the database using mysql.connector
-conn = mysql.connector.connect(host=hostname, user=uname, password=pwd)
-cursor = conn.cursor()
-
-# Create the database if it doesn't exist
-cursor.execute(f"CREATE DATABASE IF NOT EXISTS {dbname}")
-cursor.close()
-conn.close()
-
-# Step 2: Connect to the newly created database using SQLAlchemy
+# Connect to the MySQL database
 engine = create_engine(f"mysql+pymysql://{uname}:{pwd}@{hostname}/{dbname}")
 
-# Step 3: Read the Excel file
-file_url = 'https://www.eia.gov/dnav/pet/hist_xls/EMD_EPD2DXL0_PTE_R5XCA_DPGw.xls'
-tables = pd.read_excel(file_url, sheet_name=None, header=2)
+# Fetch data from the database
+query = "SELECT date, price FROM gold ORDER BY date"
+df = pd.read_sql(query, con=engine)
 
-# Check available sheets
-print("Available sheets:", tables.keys())  # Debugging: Check the correct sheet name
+# Convert 'date' column to datetime format
+df['date'] = pd.to_datetime(df['date'])
 
-# Load the correct sheet
-df = tables.get('Data 1')  # Ensure 'Data 1' exists
+# Plot the gold price trend
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=df, x='date', y='price', marker='o', color='gold')
 
-if df is None:
-    raise ValueError("Sheet 'Data 1' not found in the Excel file.")
-print("Columns in 'Data 1':", df.columns)
+# Customize the plot
+plt.title("Gold Price Over Time", fontsize=14)
+plt.xlabel("Date", fontsize=12)
+plt.ylabel("Price (USD)", fontsize=12)
+plt.xticks(rotation=45)
+plt.grid(True)
 
-# Rename columns based on actual content
-df.columns = [col.strip().replace(" ", "_").lower() for col in df.columns]  # Normalize column names
-print("Normalized columns:", df.columns)
-
-possible_date_cols = [col for col in df.columns if 'date' in col.lower()]
-possible_price_cols = [col for col in df.columns if 'price' in col.lower()]
-
-print("Possible date columns:", possible_date_cols)
-print("Possible price columns:", possible_price_cols)
-
-if possible_date_cols:
-    df.rename(columns={possible_date_cols[0]: 'date'}, inplace=True)
-if possible_price_cols:
-    df.rename(columns={possible_price_cols[0]: 'gold_price'}, inplace=True)
-
-if 'date' not in df.columns or 'gold_price' not in df.columns:
-    raise KeyError(f"Missing required columns. Available columns: {df.columns}")
-df.rename(columns={'gold_price': 'price'}, inplace=True)  # Rename for consistency
-
-# Drop NaN values
-df.dropna(inplace=True)
-
-# Step 4: Load the data into SQL
-connection = engine.connect()
-df.to_sql('gold', con=engine, if_exists='replace', index=False)
-
-# Step 5: Create a temporary table and manipulate data
-connection.execute(text('CREATE TABLE IF NOT EXISTS gold_temp_2 LIKE gold'))
-connection.execute(text('INSERT INTO gold_temp_2 SELECT DISTINCT date, price FROM gold'))
-connection.execute(text('DROP TABLE gold'))
-connection.execute(text('ALTER TABLE gold_temp_2 RENAME TO gold'))
-
-# Step 6: Close the database connection
-connection.close()
-
-print("Database setup and data import completed successfully.")
+# Show the plot
+plt.show()
