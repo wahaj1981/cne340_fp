@@ -1,7 +1,3 @@
-# CNE 340 Final Project
-# Project Name: Historic Gold Price Data Analysis
-# Due date: 03/18/2025
-# Project Team : 1- Wahaj AL Obid, 2- Aaron Henson, 3- Lidsyda Nouanphachan
 import pandas as pd
 import numpy as np
 import mysql.connector
@@ -40,14 +36,25 @@ df = tables.get('Data 1')  # Ensure 'Data 1' exists
 
 if df is None:
     raise ValueError("Sheet 'Data 1' not found in the Excel file.")
+print("Columns in 'Data 1':", df.columns)
 
 # Rename columns based on actual content
 df.columns = [col.strip().replace(" ", "_").lower() for col in df.columns]  # Normalize column names
+print("Normalized columns:", df.columns)
 
-# Ensure 'date' and the required column exist
+possible_date_cols = [col for col in df.columns if 'date' in col.lower()]
+possible_price_cols = [col for col in df.columns if 'price' in col.lower()]
+
+print("Possible date columns:", possible_date_cols)
+print("Possible price columns:", possible_price_cols)
+
+if possible_date_cols:
+    df.rename(columns={possible_date_cols[0]: 'date'}, inplace=True)
+if possible_price_cols:
+    df.rename(columns={possible_price_cols[0]: 'gold_price'}, inplace=True)
+
 if 'date' not in df.columns or 'gold_price' not in df.columns:
-    raise KeyError("Missing required columns: 'date' or 'gold_price'.")
-
+    raise KeyError(f"Missing required columns. Available columns: {df.columns}")
 df.rename(columns={'gold_price': 'price'}, inplace=True)  # Rename for consistency
 
 # Drop NaN values
