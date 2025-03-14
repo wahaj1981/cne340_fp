@@ -1,12 +1,14 @@
-import mysql.connector  # Library for MySQL database connection
-import requests  # Library for making HTTP requests
-import pandas as pd  # Library for data manipulation and analysis
-import numpy as np  # Library for numerical computations
-import time  # Library for time-related functions
-from sqlalchemy import create_engine, text  # Library for SQL operations
-from datetime import date  # Library for date operations
-import pymysql  # Import pymysql for MySQL connection in SQLAlchemy
-import matplotlib.pyplot as plt  # Library for data visualization
+# CNE 340 //Group Project on The Gold Price Analysis// Tracking https://auronum.co.uk/gold-price-news/historic-gold-price-data/
+# Wahaj Al Obid
+# Aaron Henson
+# Lidsyda Nouanphachan
+# Date: 03/18/2025
+
+import mysql.connector
+import pandas as pd
+import numpy as np
+from sqlalchemy import create_engine, text
+import matplotlib.pyplot as plt
 
 # Database credentials
 uname = 'root'
@@ -45,7 +47,7 @@ def main():
 
     # Print column names to inspect structure before renaming
     print("Column names before renaming:", tables.columns)
-
+    print("*" * 100)
     # Rename columns to meaningful names based on actual structure
     tables.rename(columns={
         "USD/Gold": "Date",  # Corrected column name to match the actual 'USD/Gold'
@@ -57,7 +59,7 @@ def main():
 
     # Print column names after renaming
     print("Column names after renaming:", tables.columns)
-
+    print("*" * 100)
     # Select only relevant columns
     tables = tables[['Date', 'Gold_Price']]
     tables.columns = ['Date', 'Gold_Price']
@@ -99,38 +101,70 @@ rows = cursor.fetchall()
 cursor.close()
 conn.close()
 
-#######################################################################################
+###################### Data Analysis using Panda ################################
 
 # Convert query results into a pandas DataFrame
 df = pd.DataFrame(rows, columns=['Date', 'Gold_Price'])
-print(df)
+df.dropna(subset=['Date', 'Gold_Price'], inplace=True)  # Drop rows where either Date or Gold_Price is NaN
 
-# Convert 'Gold_Price' column to numeric format
-df['Gold_Price'] = pd.to_numeric(df['Gold_Price'], errors='coerce')
-print(df)
-print(df.head)
+df['Gold_Price'] = pd.to_numeric(df['Gold_Price'], errors='coerce') # Convert 'Gold_Price' column to numeric format
+pd.options.display.float_format = "{:.2f}".format
+
 
 # Set 'Date' column as the index
 df.set_index('Date', inplace=True)
+print("\033[1;34m*********** Comprehensive Analysis of Gold Price Trends: Insights from 1968 to 2024 ************\033[0m")
 
 # Resample the data annually and calculate the average gold price per year
 yearly_avg = df['Gold_Price'].resample('YE').mean()
+print("\033[31mReport no.1 : Annual Gold Price Trends from 1968 to 2024\033[0m")
+
 print(yearly_avg)
+print("*" * 100)
 
-# Create a sample DataFrame with different types of data
-df2 = pd.DataFrame(
-    {
-        "A": 1.0,
-        "B": pd.Timestamp("20130102"),
-        "C": pd.Series(1, index=list(range(4)), dtype="float32"),
-        "D": np.array([3] * 4, dtype="int32"),
-        "E": pd.Categorical(["test", "train", "test", "train"]),
-        "F": "foo",
-    }
-)
-print(df2)
+####################################### TEST #################################################
 
-########################################################################################
+
+
+# Calculate the year-over-year growth
+yearly_avg_growth = yearly_avg.pct_change() * 100
+print("\033[31mReport no.2: Year-over-Year Growth in Gold Price (%):\033[0m")
+print(yearly_avg_growth)
+
+# 30-day rolling average of Gold Price
+df['30_Day_Rolling_Avg'] = df['Gold_Price'].rolling(window=30).mean()
+
+# Top 5 highest and lowest gold prices
+highest_prices = df.nlargest(5, 'Gold_Price')
+lowest_prices = df.nsmallest(5, 'Gold_Price')
+
+print("*" * 100)
+
+print("\033[31mReport no.3: Top 5 Highest Gold Prices:\033[0m")
+print(highest_prices)
+print("*" * 100)
+print("\033[31mReport no.4: Top 5 Lowest Gold Prices:\033[0m")
+print(lowest_prices)
+print("*" * 100)
+# Basic statistical summary
+summary_stats = df['Gold_Price'].describe()
+print("\033[31mReport no.5: Summary Statistics for Gold Prices:\033[0m")
+print(summary_stats)
+
+print("*" * 100)
+
+# Extract the year from the Date index
+df['Year'] = df.index.year
+
+# Resample the original data to yearly frequency and calculate the average
+yearly_avg_price = df['Gold_Price'].resample('YE').mean()
+
+# Calculate the correlation between the yearly average gold price and the yearly gold price data
+correlation = yearly_avg_price.corr(df['Gold_Price'].resample('YE').last())  # Resampling the original data to the end of each year
+print("\033[31mReport no.6: Correlation between Gold Price and Year:\033[0m", correlation)
+
+
+######################################################################################
 
 # Plot 1: Line chart showing gold price over time
 plt.figure(figsize=(10, 5))
@@ -144,14 +178,14 @@ plt.show()
 
 # Plot 2: Bar chart showing gold price for each date
 # Filter data for the year 2019-2020
-df_2020 = df[(df.index >= '2019-01-01') & (df.index <= '2020-12-31')]
+df_2024 = df[(df.index >= '2024-01-01') & (df.index <= '2024-12-31')]
 
-# Plot: Bar chart showing gold price for each date in 2020
+# Plot: Bar chart showing gold price for each date in 2019
 plt.figure(figsize=(10, 5))
-plt.bar(df_2020.index, df_2020['Gold_Price'], color='g', label='Gold_Price')
+plt.bar(df_2024.index, df_2024['Gold_Price'], color='g', label='Gold_Price')
 plt.xlabel('Date')
 plt.ylabel('Gold_Price')
-plt.title('Gold Price for Each Date in 2020')
+plt.title('Gold Price for Each Date in 2024')
 plt.legend()
 plt.grid(axis='y')
 plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
@@ -171,6 +205,3 @@ colors = plt.cm.viridis(np.linspace(0, 1, len(yearly_avg_filtered)))
 plt.pie(yearly_avg_filtered, labels=yearly_avg_filtered.index.year, autopct='%1.1f%%', startangle=140, colors=colors)
 plt.title("Gold Price Distribution from 2015 to 2024")
 plt.show()
-
-
-
