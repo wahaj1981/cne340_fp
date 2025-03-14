@@ -122,9 +122,6 @@ print("\033[31mReport no.1 : Annual Gold Price Trends from 1968 to 2024\033[0m")
 print(yearly_avg)
 print("*" * 100)
 
-####################################### TEST #################################################
-
-
 
 # Calculate the year-over-year growth
 yearly_avg_growth = yearly_avg.pct_change() * 100
