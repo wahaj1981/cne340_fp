@@ -173,16 +173,16 @@ plt.legend()
 plt.grid()
 plt.show()
 
-# Plot 2: Bar chart showing gold price for each date
+# Plot 2: Bar chart showing gold price for each month
 # Filter data for the year 2019-2020
 df_2024 = df[(df.index >= '2024-01-01') & (df.index <= '2024-12-31')]
 
-# Plot: Bar chart showing gold price for each date in 2019
+# Plot: Bar chart showing gold price for each month in 2024
 plt.figure(figsize=(10, 5))
 plt.bar(df_2024.index, df_2024['Gold_Price'], color='g', label='Gold_Price')
 plt.xlabel('Date')
 plt.ylabel('Gold_Price')
-plt.title('Gold Price for Each Date in 2024')
+plt.title('Gold Price for Each Month in 2024')
 plt.legend()
 plt.grid(axis='y')
 plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
