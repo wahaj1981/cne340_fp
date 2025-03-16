@@ -17,7 +17,7 @@ This project is part of the CNE 340 Winter Class, undertaken to analyze historic
 
 Key Objectives:
 
-Data Collection: Gather historical gold price data from reliable sources such as the World Gold Council and Yahoo Finance API.
+Data Collection: Gather historical gold price data from reliable sources such as the World Gold Council and Yahoo Finance API. We used https://auronum.co.uk/gold-price-news/historic-gold-price-data/
 
 Data Storage & Processing: Store and process data securely in a WAMP-based database using Python and Pandas for analysis.
 
@@ -36,3 +36,13 @@ Programming: Python, Pandas
 Database: WAMP server
 
 Visualization: Dashboards for data representation
+
+Python Interpreters Required to run:
+- pandas
+- mysql-connector
+- SQLAlchemy
+- matplotlib
+- PyMySql
+- pip
+- matplotlib
+- openpyxl
